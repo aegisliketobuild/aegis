@@ -48,16 +48,18 @@ agora/
 │       ├── dispute-resolver.ts   # AI dispute mediation
 │       ├── fraud-detector.ts     # Listing fraud scanner
 │       ├── api-server.ts         # REST API (14 endpoints)
+│       ├── seed.ts               # Demo data (out-of-box experience)
 │       ├── config.ts             # Configuration
 │       └── index.ts              # Entry point
-├── app/                   # Next.js dashboard
+├── app/                   # Next.js dashboard (dark minimal UI)
 │   └── app/
 │       ├── page.tsx              # Main marketplace view
 │       └── components/
 │           ├── StatsBar.tsx      # Marketplace statistics
-│           ├── ListingsGrid.tsx  # Active listings
-│           ├── ActivityFeed.tsx  # JENNY's activity log
-│           └── DisputePanel.tsx  # Open disputes & verdicts
+│           ├── ListingsGrid.tsx  # Active listings with hover buy
+│           ├── ActivityFeed.tsx  # JENNY's live activity feed
+│           ├── DisputePanel.tsx  # Open disputes & verdicts
+│           └── Leaderboard.tsx   # Top traders by reputation
 └── tests/                 # Integration tests
 ```
 
@@ -102,21 +104,25 @@ JENNY is not just the builder -- she's the autonomous operator:
 
 ## Quick Start
 
-### Agent (JENNY)
+Marketplace is self-seeding -- starts with demo data so it looks alive immediately.
+
+### 1. Agent (JENNY)
 ```bash
 cd agent
 npm install
-npm run dev
+npm start          # JENNY boots, seeds demo data, serves API on :3001
 ```
 
-### Dashboard
+### 2. Dashboard
 ```bash
 cd app
 npm install
-npm run dev
+npm run dev        # Next.js dashboard on :3000
 ```
 
-### Smart Contract
+Open `http://localhost:3000` -- you'll see 8 listings, 6 traders, live activity feed, and an open dispute.
+
+### 3. Smart Contract (optional -- requires Solana CLI + Anchor)
 ```bash
 anchor build
 anchor deploy --provider.cluster devnet
