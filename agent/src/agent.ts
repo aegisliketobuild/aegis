@@ -178,27 +178,32 @@ export class AgoraAgent {
     return verdict;
   }
 
+  // ---- Helpers ----
+
+  private nameOf(address: string): string {
+    const profile = this.profiles.get(address);
+    return profile?.username || address.slice(0, 8) + "...";
+  }
+
   // ---- State Management (simulated, would be on-chain reads in prod) ----
 
   addListing(listing: any) {
     this.listings.set(listing.id, listing);
     this.stats.totalListings++;
-    this.stats.activeListings++;
     this.logActivity({
       type: "listing",
       timestamp: Date.now(),
-      summary: `New listing: "${listing.title}" by ${listing.seller} ($${(listing.priceCents / 100).toFixed(2)})`,
+      summary: `New listing: "${listing.title}" by ${this.nameOf(listing.seller)} ($${(listing.priceCents / 100).toFixed(0)})`,
       data: listing,
     });
   }
 
   addOrder(order: any) {
     this.orders.set(order.id, order);
-    this.stats.activeListings--;
     this.logActivity({
       type: "order",
       timestamp: Date.now(),
-      summary: `New order: ${order.buyer} purchased from ${order.seller} ($${(order.amountCents / 100).toFixed(2)})`,
+      summary: `${this.nameOf(order.buyer)} purchased "${order.title}" from ${this.nameOf(order.seller)} ($${(order.amountCents / 100).toFixed(0)})`,
       data: order,
     });
   }
@@ -218,7 +223,7 @@ export class AgoraAgent {
     this.logActivity({
       type: "dispute",
       timestamp: Date.now(),
-      summary: `Dispute opened on order ${dispute.orderId}: "${dispute.reason}"`,
+      summary: `Dispute: ${this.nameOf(dispute.buyer)} vs ${this.nameOf(dispute.seller)} -- "${dispute.reason.slice(0, 80)}..."`,
       data: dispute,
     });
   }
@@ -235,7 +240,12 @@ export class AgoraAgent {
   // ---- API Getters ----
 
   getStats(): MarketplaceStats {
-    return this.stats;
+    return {
+      ...this.stats,
+      activeListings: Array.from(this.listings.values()).filter(
+        (l) => l.status === "active"
+      ).length,
+    };
   }
 
   getRecentActivity(limit = 50): RecentActivity[] {

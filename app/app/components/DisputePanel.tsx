@@ -2,12 +2,11 @@
 
 interface Dispute {
   id: string;
-  orderId: string;
-  buyer: string;
-  seller: string;
   reason: string;
   amountCents: number;
   status: string;
+  buyer: string;
+  seller: string;
   createdAt: number;
   verdict?: {
     resolution: string;
@@ -17,52 +16,48 @@ interface Dispute {
 }
 
 export default function DisputePanel({ disputes }: { disputes: Dispute[] }) {
-  if (!disputes.length) {
-    return (
-      <div className="card">
-        <h2 className="text-lg font-semibold text-white mb-4">
-          Open Disputes
-        </h2>
-        <p className="text-gray-500 text-sm">
-          No open disputes. JENNY is ready to mediate when needed.
-        </p>
-      </div>
-    );
-  }
+  if (!disputes.length) return null;
 
   return (
-    <div className="card">
-      <h2 className="text-lg font-semibold text-white mb-4">
-        Open Disputes ({disputes.length})
+    <div>
+      <h2 className="text-sm font-medium text-zinc-400 uppercase tracking-widest mb-4">
+        Open Disputes
       </h2>
-      <div className="space-y-4">
+      <div className="space-y-3">
         {disputes.map((d) => (
-          <div key={d.id} className="border border-red-900/30 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="badge-high">
-                ${(d.amountCents / 100).toFixed(2)} at stake
-              </span>
-              <span className="text-xs text-gray-500">
-                {new Date(d.createdAt).toLocaleString()}
+          <div key={d.id} className="card border-red-500/10">
+            <div className="flex items-center justify-between mb-3">
+              <span className="badge badge-open">dispute</span>
+              <span className="text-sm font-semibold text-zinc-300 tabular-nums">
+                ${(d.amountCents / 100).toFixed(0)} USDC
               </span>
             </div>
-            <p className="text-sm text-white mb-2">{d.reason}</p>
-            <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
+            <p className="text-sm text-zinc-300 leading-relaxed mb-3">
+              {d.reason}
+            </p>
+            <div className="flex items-center gap-3 text-[11px] text-zinc-600 mb-3">
               <span>Buyer: {d.buyer?.slice(0, 8)}...</span>
               <span>Seller: {d.seller?.slice(0, 8)}...</span>
             </div>
 
             {d.verdict ? (
-              <div className="bg-purple-900/20 border border-purple-800/30 rounded p-3">
-                <p className="text-xs text-purple-400 font-medium mb-1">
-                  JENNY's Verdict ({d.verdict.confidence}% confidence)
+              <div className="bg-violet-500/5 border border-violet-500/10 rounded-lg p-3 mt-2">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-[11px] font-medium text-violet-400 uppercase tracking-wider">
+                    JENNY's Verdict
+                  </span>
+                  <span className="text-[11px] text-zinc-600">
+                    {d.verdict.confidence}% confidence
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-400 leading-relaxed whitespace-pre-line">
+                  {d.verdict.reasoning}
                 </p>
-                <p className="text-sm text-gray-300">{d.verdict.reasoning}</p>
               </div>
             ) : (
-              <div className="text-xs text-amber-400">
+              <p className="text-[11px] text-amber-500/60 mt-1">
                 Awaiting evidence from both parties...
-              </div>
+              </p>
             )}
           </div>
         ))}

@@ -6,7 +6,6 @@ interface Stats {
   completedTrades: number;
   totalVolumeCents: number;
   openDisputes: number;
-  resolvedDisputes: number;
   flaggedListings: number;
 }
 
@@ -14,23 +13,25 @@ export default function StatsBar({ stats }: { stats: Stats | null }) {
   if (!stats) return null;
 
   const items = [
-    { label: "Active Listings", value: stats.activeListings, color: "text-white" },
-    { label: "Completed Trades", value: stats.completedTrades, color: "text-green-400" },
+    { label: "Listings", value: String(stats.activeListings) },
+    { label: "Trades", value: String(stats.completedTrades) },
     {
-      label: "Total Volume",
+      label: "Volume",
       value: `$${(stats.totalVolumeCents / 100).toLocaleString()}`,
-      color: "text-amber-400",
     },
-    { label: "Open Disputes", value: stats.openDisputes, color: stats.openDisputes > 0 ? "text-red-400" : "text-gray-400" },
-    { label: "Fraud Flags", value: stats.flaggedListings, color: stats.flaggedListings > 0 ? "text-yellow-400" : "text-gray-400" },
+    { label: "Disputes", value: String(stats.openDisputes) },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
       {items.map((item) => (
-        <div key={item.label} className="card text-center">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">{item.label}</p>
-          <p className={`text-2xl font-bold ${item.color}`}>{item.value}</p>
+        <div key={item.label} className="card !p-4 text-center">
+          <p className="text-[11px] text-zinc-500 uppercase tracking-widest mb-1">
+            {item.label}
+          </p>
+          <p className="text-xl font-semibold text-white tabular-nums">
+            {item.value}
+          </p>
         </div>
       ))}
     </div>

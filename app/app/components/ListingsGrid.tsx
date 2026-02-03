@@ -11,64 +11,60 @@ interface Listing {
   createdAt: number;
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  services: "bg-blue-900/30 text-blue-400 border-blue-800",
-  goods: "bg-green-900/30 text-green-400 border-green-800",
-  digital: "bg-purple-900/30 text-purple-400 border-purple-800",
-  general: "bg-gray-900/30 text-gray-400 border-gray-800",
-};
-
 export default function ListingsGrid({ listings }: { listings: Listing[] }) {
   if (!listings.length) {
     return (
-      <div className="card">
-        <h2 className="text-lg font-semibold text-white mb-4">Marketplace</h2>
-        <p className="text-gray-500">
-          No active listings yet. The marketplace is open -- anyone can list goods and services.
-        </p>
+      <div className="card text-center py-16">
+        <p className="text-zinc-500">Marketplace is empty. Be the first to list.</p>
       </div>
     );
   }
 
   return (
-    <div className="card">
-      <h2 className="text-lg font-semibold text-white mb-4">
-        Marketplace ({listings.length} active)
-      </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {listings.map((listing) => (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-sm font-medium text-zinc-400 uppercase tracking-widest">
+          Marketplace
+        </h2>
+        <span className="text-xs text-zinc-600">
+          {listings.length} active
+        </span>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {listings.map((listing, i) => (
           <div
             key={listing.id}
-            className="border border-aegis-border rounded-lg p-4 hover:border-amber-800 transition-colors"
+            className="card group cursor-pointer hover:border-amber-500/30 animate-fade-in"
+            style={{ animationDelay: `${i * 50}ms` }}
           >
-            <div className="flex items-center justify-between mb-2">
-              <span
-                className={`px-2 py-0.5 rounded text-xs font-medium border ${CATEGORY_COLORS[listing.category] || CATEGORY_COLORS.general}`}
-              >
+            <div className="flex items-start justify-between mb-3">
+              <span className={`badge badge-${listing.category}`}>
                 {listing.category}
               </span>
-              <span className="text-lg font-bold text-amber-400">
-                ${(listing.priceCents / 100).toFixed(2)}
+              <span className="text-lg font-bold text-amber-400 tabular-nums">
+                ${(listing.priceCents / 100).toFixed(0)}
               </span>
             </div>
-            <h3 className="text-sm font-medium text-white mb-1">{listing.title}</h3>
-            <p className="text-xs text-gray-400 mb-3 line-clamp-2">
+            <h3 className="text-[15px] font-medium text-white leading-snug mb-2 group-hover:text-amber-300 transition-colors">
+              {listing.title}
+            </h3>
+            <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2 mb-4">
               {listing.description}
             </p>
-            <div className="flex items-center justify-between text-xs text-gray-500">
-              <span>
-                by {listing.seller?.slice(0, 8)}...
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs text-zinc-600">
+                <div className="w-5 h-5 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-800" />
+                <span>{listing.seller?.slice(0, 6)}...</span>
                 {listing.sellerReputation != null && (
-                  <span className="ml-1 text-amber-600">
-                    ({listing.sellerReputation} rep)
+                  <span className="text-amber-600/70">
+                    {listing.sellerReputation}
                   </span>
                 )}
-              </span>
-              <span>{new Date(listing.createdAt).toLocaleDateString()}</span>
+              </div>
+              <button className="btn-primary !py-1.5 !px-3 !text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                Buy
+              </button>
             </div>
-            <button className="w-full mt-3 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded text-sm font-medium transition-colors">
-              Buy with USDC
-            </button>
           </div>
         ))}
       </div>

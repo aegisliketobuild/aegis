@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import { AgoraAgent } from "./agent";
 import { startApiServer } from "./api-server";
+import { seedDemoData } from "./seed";
 
 dotenv.config();
 
@@ -18,6 +19,10 @@ async function main() {
   console.log();
 
   const agent = new AgoraAgent();
+
+  // Seed demo data so marketplace looks alive out of the box
+  seedDemoData(agent);
+
   agent.start();
   startApiServer(agent);
 
