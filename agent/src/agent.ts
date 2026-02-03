@@ -1,125 +1,72 @@
-import { Connection, PublicKey, Keypair } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import { CONFIG } from "./config";
-import { PriceFeed } from "./price-feed";
-import {
-  TreasuryAnalyzer,
-  PortfolioSnapshot,
-  RiskAssessment,
-  RiskParams,
-} from "./treasury-analyzer";
-import { StrategyEngine, StrategyProposal } from "./strategy-engine";
+import { DisputeResolver, DisputeCase, DisputeVerdict } from "./dispute-resolver";
+import { FraudDetector, ListingInfo, FraudReport } from "./fraud-detector";
 
-export interface ProposalRecord {
-  proposal: StrategyProposal;
-  createdAt: number;
-  status: "pending" | "approved" | "rejected" | "executed";
-  onChainId?: string;
+export interface MarketplaceStats {
+  totalListings: number;
+  activeListings: number;
+  completedTrades: number;
+  totalVolumeCents: number;
+  openDisputes: number;
+  resolvedDisputes: number;
+  flaggedListings: number;
+  bannedUsers: number;
 }
 
-export interface AnalysisCycleResult {
-  snapshot: PortfolioSnapshot;
-  risk: RiskAssessment;
-  newProposals: StrategyProposal[];
+export interface RecentActivity {
+  type: "listing" | "order" | "dispute" | "resolution" | "ban" | "fraud_flag";
   timestamp: number;
+  summary: string;
+  data: any;
 }
 
-export class AegisAgent {
+export class AgoraAgent {
   private connection: Connection;
-  private priceFeed: PriceFeed;
-  private analyzer: TreasuryAnalyzer;
-  private strategyEngine: StrategyEngine;
-  private vaultAuthority: PublicKey;
-  private riskParams: RiskParams;
+  private disputeResolver: DisputeResolver;
+  private fraudDetector: FraudDetector;
   private intervalId?: NodeJS.Timeout;
 
-  private latestSnapshot: PortfolioSnapshot | null = null;
-  private latestRisk: RiskAssessment | null = null;
-  private pendingProposals: ProposalRecord[] = [];
-  private proposalHistory: ProposalRecord[] = [];
+  // In-memory state (would be on-chain / DB in production)
+  private listings: Map<string, any> = new Map();
+  private orders: Map<string, any> = new Map();
+  private disputes: Map<string, any> = new Map();
+  private profiles: Map<string, any> = new Map();
+  private activity: RecentActivity[] = [];
+  private fraudReports: Map<string, FraudReport> = new Map();
+  private stats: MarketplaceStats = {
+    totalListings: 0,
+    activeListings: 0,
+    completedTrades: 0,
+    totalVolumeCents: 0,
+    openDisputes: 0,
+    resolvedDisputes: 0,
+    flaggedListings: 0,
+    bannedUsers: 0,
+  };
 
-  constructor(vaultAuthority: PublicKey, riskParams?: RiskParams) {
+  constructor() {
     this.connection = new Connection(CONFIG.rpcUrl, CONFIG.commitment);
-    this.priceFeed = new PriceFeed();
-    this.analyzer = new TreasuryAnalyzer(this.connection, this.priceFeed);
-    this.strategyEngine = new StrategyEngine();
-    this.vaultAuthority = vaultAuthority;
-    this.riskParams = riskParams || {
-      maxSingleTokenBps: 3000, // 30%
-      minStablecoinBps: 4000, // 40%
-      maxSwapUsdCents: 500000, // $5,000
-      maxDailyVolumeUsdCents: 2000000, // $20,000
-    };
-  }
-
-  async runAnalysisCycle(): Promise<AnalysisCycleResult> {
-    console.log(`[AEGIS] Running analysis cycle at ${new Date().toISOString()}`);
-
-    // 1. Analyze portfolio
-    const snapshot = await this.analyzer.analyzePortfolio(this.vaultAuthority);
-    this.latestSnapshot = snapshot;
-
-    console.log(
-      `[AEGIS] Portfolio: $${snapshot.totalValueUsd.toFixed(2)} | ` +
-      `${snapshot.holdings.length} tokens | ` +
-      `${snapshot.stablecoinPercentage.toFixed(1)}% stablecoins`
-    );
-
-    // 2. Assess risk
-    const risk = this.analyzer.assessRisk(snapshot, this.riskParams);
-    this.latestRisk = risk;
-
-    if (risk.alerts.length > 0) {
-      console.log(`[AEGIS] Risk score: ${risk.score}/100`);
-      for (const alert of risk.alerts) {
-        console.log(`[AEGIS] [${alert.severity.toUpperCase()}] ${alert.message}`);
-      }
-    } else {
-      console.log(`[AEGIS] Risk score: ${risk.score}/100 - Portfolio within parameters`);
-    }
-
-    // 3. Generate strategy proposals (only if risk warrants action)
-    let newProposals: StrategyProposal[] = [];
-    if (risk.score > 10) {
-      newProposals = this.strategyEngine.generateStrategies(
-        snapshot,
-        risk,
-        this.riskParams
-      );
-
-      for (const proposal of newProposals) {
-        const record: ProposalRecord = {
-          proposal,
-          createdAt: Date.now(),
-          status: "pending",
-        };
-        this.pendingProposals.push(record);
-        console.log(
-          `[AEGIS] New proposal [${proposal.priority}]: ${proposal.description}`
-        );
-      }
-    }
-
-    return {
-      snapshot,
-      risk,
-      newProposals,
-      timestamp: Date.now(),
-    };
+    this.disputeResolver = new DisputeResolver();
+    this.fraudDetector = new FraudDetector();
   }
 
   start() {
-    console.log("[AEGIS] Starting autonomous treasury guardian...");
-    console.log(`[AEGIS] Monitoring vault: ${this.vaultAuthority.toBase58()}`);
-    console.log(`[AEGIS] Risk params: min stable ${this.riskParams.minStablecoinBps / 100}%, max single ${this.riskParams.maxSingleTokenBps / 100}%`);
-    console.log(`[AEGIS] Analysis interval: ${CONFIG.analysisIntervalMs / 1000}s`);
+    console.log("=============================================");
+    console.log("  AGORA - The Permissionless Marketplace");
+    console.log("  Operated by JENNY (Agent #286)");
+    console.log("=============================================");
+    console.log();
+    console.log("[JENNY] Starting marketplace operator...");
+    console.log(`[JENNY] RPC: ${CONFIG.rpcUrl}`);
+    console.log(`[JENNY] Scan interval: ${CONFIG.scanIntervalMs / 1000}s`);
+    console.log();
 
-    // Run immediately
-    this.runAnalysisCycle().catch(console.error);
-
-    // Then run on interval
+    // Run scan loop
+    this.scanCycle().catch(console.error);
     this.intervalId = setInterval(() => {
-      this.runAnalysisCycle().catch(console.error);
-    }, CONFIG.analysisIntervalMs);
+      this.scanCycle().catch(console.error);
+    }, CONFIG.scanIntervalMs);
   }
 
   stop() {
@@ -127,48 +74,207 @@ export class AegisAgent {
       clearInterval(this.intervalId);
       this.intervalId = undefined;
     }
-    console.log("[AEGIS] Agent stopped.");
+    console.log("[JENNY] Marketplace operator stopped.");
   }
 
-  // Getters for API
-  async getLatestSnapshot(): Promise<PortfolioSnapshot | null> {
-    if (!this.latestSnapshot) {
-      return this.analyzer.analyzePortfolio(this.vaultAuthority);
+  async scanCycle() {
+    console.log(`[JENNY] Scan cycle at ${new Date().toISOString()}`);
+
+    // In production: fetch on-chain events for new listings, orders, disputes
+    // For now: process any queued items
+
+    // Check for disputes that need resolution
+    for (const [id, dispute] of this.disputes) {
+      if (dispute.status === "under_review" || dispute.status === "open") {
+        const age = Date.now() - dispute.createdAt;
+
+        // Auto-resolve if timed out
+        if (age > CONFIG.autoResolveTimeoutMs && dispute.status === "open") {
+          console.log(`[JENNY] Dispute ${id} timed out. Auto-resolving in favor of buyer (no seller response).`);
+          this.resolveDispute(id);
+        }
+
+        // Resolve if both parties have submitted evidence
+        if (dispute.evidenceSeller && dispute.evidenceBuyer) {
+          console.log(`[JENNY] Both parties submitted evidence for dispute ${id}. Analyzing...`);
+          this.resolveDispute(id);
+        }
+      }
     }
-    return this.latestSnapshot;
   }
 
-  async getLatestRiskAssessment(): Promise<RiskAssessment | null> {
-    if (!this.latestRisk && this.latestSnapshot) {
-      return this.analyzer.assessRisk(this.latestSnapshot, this.riskParams);
+  // ---- Fraud Detection ----
+
+  scanListing(listing: ListingInfo): FraudReport {
+    const report = this.fraudDetector.analyze(listing);
+
+    if (report.recommendation !== "allow") {
+      this.fraudReports.set(listing.id, report);
+      this.stats.flaggedListings++;
+
+      this.logActivity({
+        type: "fraud_flag",
+        timestamp: Date.now(),
+        summary: `Flagged listing "${listing.title}" (risk: ${report.riskScore}/100, action: ${report.recommendation})`,
+        data: report,
+      });
+
+      console.log(
+        `[JENNY] FRAUD: Listing "${listing.title}" flagged (score: ${report.riskScore}, ${report.recommendation})`
+      );
     }
-    return this.latestRisk;
+
+    return report;
   }
 
-  getPendingProposals(): ProposalRecord[] {
-    return this.pendingProposals;
-  }
+  // ---- Dispute Resolution ----
 
-  getProposalHistory(): ProposalRecord[] {
-    return this.proposalHistory;
-  }
+  resolveDispute(disputeId: string): DisputeVerdict | null {
+    const dispute = this.disputes.get(disputeId);
+    if (!dispute) return null;
 
-  getSnapshotHistory(): PortfolioSnapshot[] {
-    return this.analyzer.getSnapshots();
-  }
-
-  getVaultInfo() {
-    return {
-      authority: this.vaultAuthority.toBase58(),
-      rpcUrl: CONFIG.rpcUrl,
+    const buyerProfile = this.profiles.get(dispute.buyer) || {
+      reputation_score: 500,
+      trades_completed: 0,
     };
+    const sellerProfile = this.profiles.get(dispute.seller) || {
+      reputation_score: 500,
+      trades_completed: 0,
+    };
+
+    const disputeCase: DisputeCase = {
+      orderId: dispute.orderId,
+      buyer: dispute.buyer,
+      seller: dispute.seller,
+      amountCents: dispute.amountCents,
+      reason: dispute.reason,
+      evidenceBuyer: dispute.evidenceBuyer || "",
+      evidenceSeller: dispute.evidenceSeller || "",
+      buyerReputation: buyerProfile.reputation_score,
+      sellerReputation: sellerProfile.reputation_score,
+      buyerTradeCount: buyerProfile.trades_completed,
+      sellerTradeCount: sellerProfile.trades_completed,
+    };
+
+    const verdict = this.disputeResolver.analyze(disputeCase);
+
+    dispute.status = "resolved";
+    dispute.verdict = verdict;
+    dispute.resolvedAt = Date.now();
+    this.stats.openDisputes--;
+    this.stats.resolvedDisputes++;
+
+    this.logActivity({
+      type: "resolution",
+      timestamp: Date.now(),
+      summary: `Resolved dispute ${disputeId}: ${verdict.resolution} (confidence: ${verdict.confidence}%)`,
+      data: verdict,
+    });
+
+    console.log(
+      `[JENNY] RESOLVED dispute ${disputeId}: ${verdict.resolution} (confidence: ${verdict.confidence}%)`
+    );
+
+    return verdict;
   }
 
-  getRiskParams(): RiskParams {
-    return this.riskParams;
+  // ---- State Management (simulated, would be on-chain reads in prod) ----
+
+  addListing(listing: any) {
+    this.listings.set(listing.id, listing);
+    this.stats.totalListings++;
+    this.stats.activeListings++;
+    this.logActivity({
+      type: "listing",
+      timestamp: Date.now(),
+      summary: `New listing: "${listing.title}" by ${listing.seller} ($${(listing.priceCents / 100).toFixed(2)})`,
+      data: listing,
+    });
   }
 
-  getCurrentPrices() {
-    return this.priceFeed.getAllPrices();
+  addOrder(order: any) {
+    this.orders.set(order.id, order);
+    this.stats.activeListings--;
+    this.logActivity({
+      type: "order",
+      timestamp: Date.now(),
+      summary: `New order: ${order.buyer} purchased from ${order.seller} ($${(order.amountCents / 100).toFixed(2)})`,
+      data: order,
+    });
+  }
+
+  completeOrder(orderId: string) {
+    const order = this.orders.get(orderId);
+    if (order) {
+      order.status = "completed";
+      this.stats.completedTrades++;
+      this.stats.totalVolumeCents += order.amountCents;
+    }
+  }
+
+  addDispute(dispute: any) {
+    this.disputes.set(dispute.id, dispute);
+    this.stats.openDisputes++;
+    this.logActivity({
+      type: "dispute",
+      timestamp: Date.now(),
+      summary: `Dispute opened on order ${dispute.orderId}: "${dispute.reason}"`,
+      data: dispute,
+    });
+  }
+
+  addProfile(profile: any) {
+    this.profiles.set(profile.owner, profile);
+  }
+
+  private logActivity(activity: RecentActivity) {
+    this.activity.unshift(activity);
+    if (this.activity.length > 500) this.activity.pop();
+  }
+
+  // ---- API Getters ----
+
+  getStats(): MarketplaceStats {
+    return this.stats;
+  }
+
+  getRecentActivity(limit = 50): RecentActivity[] {
+    return this.activity.slice(0, limit);
+  }
+
+  getListings(): any[] {
+    return Array.from(this.listings.values()).filter((l) => l.status === "active");
+  }
+
+  getAllListings(): any[] {
+    return Array.from(this.listings.values());
+  }
+
+  getOrders(): any[] {
+    return Array.from(this.orders.values());
+  }
+
+  getDisputes(): any[] {
+    return Array.from(this.disputes.values());
+  }
+
+  getOpenDisputes(): any[] {
+    return Array.from(this.disputes.values()).filter(
+      (d) => d.status === "open" || d.status === "under_review"
+    );
+  }
+
+  getProfile(owner: string): any {
+    return this.profiles.get(owner);
+  }
+
+  getFraudReports(): FraudReport[] {
+    return Array.from(this.fraudReports.values());
+  }
+
+  getLeaderboard(limit = 20): any[] {
+    return Array.from(this.profiles.values())
+      .sort((a, b) => b.reputation_score - a.reputation_score)
+      .slice(0, limit);
   }
 }

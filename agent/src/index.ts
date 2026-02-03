@@ -1,40 +1,28 @@
-import { PublicKey } from "@solana/web3.js";
 import dotenv from "dotenv";
-import { AegisAgent } from "./agent";
+import { AgoraAgent } from "./agent";
 import { startApiServer } from "./api-server";
 
 dotenv.config();
 
 async function main() {
-  console.log("===========================================");
-  console.log("  AEGIS - Autonomous Treasury Guardian");
-  console.log("  Built by JENNY for Solana DAOs");
-  console.log("===========================================");
+  console.log();
+  console.log("    _    ____  ___  ____      _    ");
+  console.log("   / \\  / ___|/ _ \\|  _ \\    / \\   ");
+  console.log("  / _ \\| |  _| | | | |_) |  / _ \\  ");
+  console.log(" / ___ \\ |_| | |_| |  _ <  / ___ \\ ");
+  console.log("/_/   \\_\\____|\\___/|_| \\_\\/_/   \\_\\");
+  console.log();
+  console.log("  The Permissionless Marketplace");
+  console.log("  Operated by JENNY (Agent #286)");
+  console.log("  No fees. No middlemen. No government.");
   console.log();
 
-  // Vault authority to monitor (configurable via env)
-  const vaultAuthority = new PublicKey(
-    process.env.VAULT_AUTHORITY || "11111111111111111111111111111111"
-  );
-
-  // Optional risk parameter overrides from env
-  const riskParams = {
-    maxSingleTokenBps: parseInt(process.env.MAX_SINGLE_TOKEN_BPS || "3000"),
-    minStablecoinBps: parseInt(process.env.MIN_STABLECOIN_BPS || "4000"),
-    maxSwapUsdCents: parseInt(process.env.MAX_SWAP_USD_CENTS || "500000"),
-    maxDailyVolumeUsdCents: parseInt(process.env.MAX_DAILY_VOLUME_USD_CENTS || "2000000"),
-  };
-
-  // Create and start the agent
-  const agent = new AegisAgent(vaultAuthority, riskParams);
+  const agent = new AgoraAgent();
   agent.start();
-
-  // Start the API server
   startApiServer(agent);
 
-  // Handle graceful shutdown
   process.on("SIGINT", () => {
-    console.log("\n[AEGIS] Shutting down...");
+    console.log("\n[JENNY] Shutting down marketplace...");
     agent.stop();
     process.exit(0);
   });

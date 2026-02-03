@@ -5,49 +5,26 @@ export const CONFIG = {
   rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
   commitment: "confirmed" as const,
 
-  // Known token mints (devnet)
-  tokens: {
-    SOL: {
-      symbol: "SOL",
-      mint: PublicKey.default, // native SOL
-      decimals: 9,
-      pythFeed: "J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix", // SOL/USD devnet
-      isStable: false,
-    },
-    USDC: {
-      symbol: "USDC",
-      mint: new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"), // devnet USDC
-      decimals: 6,
-      pythFeed: "5SSkXsEKhepKzzDCcJDfp1qFhMSSCkLHsANq3SWCEyc1", // USDC/USD devnet
-      isStable: true,
-    },
-    mSOL: {
-      symbol: "mSOL",
-      mint: new PublicKey("mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So"),
-      decimals: 9,
-      pythFeed: "9a6RNx3tCu1TSs6TBSfV2XRXEPEZXQ6WB7jRojZRvyeZ", // mSOL/USD devnet
-      isStable: false,
-    },
-  },
-
-  // Jupiter
-  jupiterApiUrl: "https://quote-api.jup.ag/v6",
-
-  // Pyth
-  pythServiceUrl: "https://hermes.pyth.network",
+  // USDC mint (devnet)
+  usdcMint: new PublicKey(
+    process.env.USDC_MINT || "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
+  ),
 
   // Agent settings
-  analysisIntervalMs: 60_000, // analyze every 60s
-  proposalCooldownMs: 300_000, // min 5 min between proposals
+  scanIntervalMs: 30_000, // check for new disputes / listings every 30s
+  reputationUpdateIntervalMs: 300_000, // recalculate reputation every 5 min
+
+  // Dispute resolution
+  autoResolveTimeoutMs: 86_400_000 * 3, // auto-resolve after 3 days if no response
+
+  // Fraud detection thresholds
+  fraud: {
+    minReputationToList: 100,
+    suspiciouslyLowPriceRatio: 0.3, // 70% below average = suspicious
+    maxListingsPerHour: 20,
+    newAccountGracePeriodMs: 86_400_000, // 24h grace period for new accounts
+  },
 
   // API server
   apiPort: parseInt(process.env.API_PORT || "3001"),
 };
-
-export interface TokenInfo {
-  symbol: string;
-  mint: PublicKey;
-  decimals: number;
-  pythFeed: string;
-  isStable: boolean;
-}
