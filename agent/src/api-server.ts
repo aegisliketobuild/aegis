@@ -178,6 +178,42 @@ export function startApiServer(agent: AgoraAgent): express.Application {
     res.json(agent.getLeaderboard(limit));
   });
 
+  // ---- Demo / Sandbox endpoints (no state changes) ----
+
+  // Scan a hypothetical listing without creating it
+  app.post("/api/demo/scan", (req, res) => {
+    const report = agent.demoScan({
+      id: `demo_${Date.now()}`,
+      seller: "demo_user",
+      title: req.body.title || "",
+      description: req.body.description || "",
+      priceCents: req.body.priceCents || 0,
+      category: req.body.category || "general",
+      sellerReputation: req.body.sellerReputation ?? 500,
+      sellerTradeCount: req.body.sellerTradeCount ?? 15,
+      sellerAccountAgeMs: req.body.sellerAccountAgeMs ?? 86_400_000 * 30,
+    });
+    res.json(report);
+  });
+
+  // Resolve a hypothetical dispute without creating it
+  app.post("/api/demo/resolve", (req, res) => {
+    const verdict = agent.demoResolve({
+      orderId: req.body.orderId || `demo_${Date.now()}`,
+      buyer: req.body.buyer || "buyer",
+      seller: req.body.seller || "seller",
+      amountCents: req.body.amountCents || 0,
+      reason: req.body.reason || "",
+      evidenceBuyer: req.body.evidenceBuyer || "",
+      evidenceSeller: req.body.evidenceSeller || "",
+      buyerReputation: req.body.buyerReputation ?? 500,
+      sellerReputation: req.body.sellerReputation ?? 500,
+      buyerTradeCount: req.body.buyerTradeCount ?? 0,
+      sellerTradeCount: req.body.sellerTradeCount ?? 0,
+    });
+    res.json(verdict);
+  });
+
   app.listen(CONFIG.apiPort, () => {
     console.log(`[JENNY] AGORA API server running on port ${CONFIG.apiPort}`);
     console.log(`[JENNY] Endpoints:`);

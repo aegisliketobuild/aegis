@@ -287,4 +287,16 @@ export class AgoraAgent {
       .sort((a, b) => b.reputation_score - a.reputation_score)
       .slice(0, limit);
   }
+
+  // ---- Demo / Sandbox (no state changes) ----
+
+  demoScan(listing: ListingInfo): FraudReport {
+    // Use a fresh detector to avoid polluting spam tracking
+    const demoDetector = new FraudDetector();
+    return demoDetector.analyze(listing);
+  }
+
+  demoResolve(disputeCase: DisputeCase): DisputeVerdict {
+    return this.disputeResolver.analyze(disputeCase);
+  }
 }

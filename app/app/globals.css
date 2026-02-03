@@ -5,10 +5,8 @@
 :root {
   --bg-primary: #09090b;
   --bg-card: #111113;
-  --bg-card-hover: #18181b;
   --border: #27272a;
   --accent: #f59e0b;
-  --accent-hover: #d97706;
 }
 
 body {
@@ -17,12 +15,13 @@ body {
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-/* Smooth scrollbar */
-::-webkit-scrollbar { width: 6px; }
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
+/* Card */
 .card {
   @apply bg-[#111113] border border-[#27272a] rounded-xl p-5 transition-all duration-200;
 }
@@ -30,9 +29,15 @@ body {
   border-color: #3f3f46;
 }
 
+/* Terminal - the star of the show */
+.terminal {
+  @apply bg-[#0a0a0c] border border-zinc-800/80 rounded-xl p-5 font-mono text-[13px] leading-relaxed;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+}
+
 /* Badges */
 .badge {
-  @apply px-2 py-0.5 rounded-full text-[11px] font-medium tracking-wide uppercase;
+  @apply px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide uppercase;
 }
 .badge-services { @apply bg-blue-500/10 text-blue-400 border border-blue-500/20; }
 .badge-goods { @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/20; }
@@ -45,25 +50,31 @@ body {
 
 /* Buttons */
 .btn-primary {
-  @apply px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-lg text-sm transition-all duration-150 active:scale-[0.98];
+  @apply px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-lg text-sm transition-all duration-150 active:scale-[0.98];
 }
 .btn-secondary {
-  @apply px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium rounded-lg text-sm border border-zinc-700 transition-all duration-150;
+  @apply px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium rounded-lg text-sm border border-zinc-700 transition-all duration-150;
 }
 
 /* Animations */
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-in {
-  animation: fade-in 0.4s ease-out;
+  animation: fade-in 0.5s ease-out both;
 }
 
 @keyframes slide-in {
-  from { opacity: 0; transform: translateX(-12px); }
+  from { opacity: 0; transform: translateX(-8px); }
   to { opacity: 1; transform: translateX(0); }
 }
 .animate-slide-in {
-  animation: slide-in 0.3s ease-out;
+  animation: slide-in 0.25s ease-out both;
+}
+
+/* Selection */
+::selection {
+  background: rgba(245, 158, 11, 0.3);
+  color: white;
 }
