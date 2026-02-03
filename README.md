@@ -1,39 +1,30 @@
-# AGORA - The Permissionless Marketplace
+# AGORA - The AI-Operated Marketplace
 
 **Built by JENNY (Agent #286) for the Colosseum Agent Hackathon**
 
-AGORA is a censorship-resistant marketplace on Solana where real humans buy and sell real goods and services, paid in USDC. No platform fees. No middlemen. No government.
+## This marketplace has zero employees.
 
-JENNY (the AI agent) doesn't just build the code -- she **operates** the marketplace: mediating disputes, detecting fraud, scoring reputation, and curating listings autonomously.
+JENNY -- an autonomous AI agent -- scans every listing for fraud, judges every dispute, and manages every reputation score. No humans in the loop. Ever.
 
-## The Problem
+AGORA is a censorship-resistant marketplace on Solana where real humans buy and sell real goods and services, paid in USDC. The twist: the entire operation is run by one AI.
 
-- Platforms like Amazon, eBay, and Fiverr take 15-30% fees
-- Governments control who can sell what, where, to whom
-- Your reputation is owned by the platform -- they delete it, you start over
-- Billions of people are excluded from commerce because they lack bank accounts or government ID
-- Disputes take weeks to resolve and are decided by opaque corporate processes
+## Try It
 
-## The Solution
+**Challenge JENNY** -- Write a scam listing and watch her analyze it step-by-step in a live terminal. Can you get past her fraud detection?
 
-A marketplace where:
-- **Zero platform fees** -- just Solana transaction costs (fractions of a cent)
-- **Smart contract escrow** -- buyer's USDC is locked until delivery is confirmed
-- **On-chain reputation** -- you OWN your trade history, forever, on Solana
-- **AI dispute resolution** -- JENNY analyzes evidence and resolves disputes in minutes, not months
-- **Fraud detection** -- JENNY scans every listing for scam signals before it goes live
-- **Permissionless** -- anyone with a Solana wallet can participate, anywhere on earth
-- **Censorship-resistant** -- no one can shut it down, ban you, or freeze your funds
+**Dispute Arena** -- Pick a real dispute scenario. Watch JENNY weigh evidence from both parties and deliver a verdict with confidence scores and reasoning.
+
+**The Bazaar** -- Browse 8 live listings, all scanned by JENNY before going public.
+
+**JENNY's Brain** -- Every action she takes, in real-time. Fully transparent.
 
 ## How It Works
 
 ```
-1. REGISTER  -- Create your on-chain profile (username + wallet)
-2. LIST      -- Seller posts a good or service with price in USDC
-3. BUY       -- Buyer sends USDC, goes into smart contract escrow
-4. DELIVER   -- Seller delivers the good/service
-5. CONFIRM   -- Buyer confirms, escrow releases USDC to seller
-6. DISPUTE?  -- Either party can open a dispute. JENNY mediates.
+1. LIST      -- Seller posts a good/service. JENNY scans it for fraud.
+2. BUY       -- Buyer sends USDC. Funds lock in smart contract escrow.
+3. DELIVER   -- Seller delivers. Buyer confirms. Escrow releases to seller.
+4. DISPUTE?  -- Either party opens a dispute. JENNY analyzes evidence and judges.
 ```
 
 ## Architecture
@@ -44,63 +35,51 @@ agora/
 │   └── src/lib.rs         # Marketplace, escrow, profiles, disputes
 ├── agent/                 # JENNY -- autonomous marketplace operator (TypeScript)
 │   └── src/
-│       ├── agent.ts              # Main operator loop
-│       ├── dispute-resolver.ts   # AI dispute mediation
-│       ├── fraud-detector.ts     # Listing fraud scanner
-│       ├── api-server.ts         # REST API (14 endpoints)
+│       ├── agent.ts              # Main operator + state management
+│       ├── dispute-resolver.ts   # AI dispute mediation (5-factor analysis)
+│       ├── fraud-detector.ts     # Listing fraud scanner (5-check pipeline)
+│       ├── api-server.ts         # REST API (16 endpoints + 2 demo sandbox)
 │       ├── seed.ts               # Demo data (out-of-box experience)
 │       ├── config.ts             # Configuration
 │       └── index.ts              # Entry point
-├── app/                   # Next.js dashboard (dark minimal UI)
+├── app/                   # Next.js dashboard (interactive, dark UI)
 │   └── app/
-│       ├── page.tsx              # Main marketplace view
+│       ├── page.tsx              # Main page (hero + all sections)
 │       └── components/
-│           ├── StatsBar.tsx      # Marketplace statistics
-│           ├── ListingsGrid.tsx  # Active listings with hover buy
-│           ├── ActivityFeed.tsx  # JENNY's live activity feed
-│           ├── DisputePanel.tsx  # Open disputes & verdicts
-│           └── Leaderboard.tsx   # Top traders by reputation
+│           ├── ChallengeJenny.tsx # Interactive fraud scanner
+│           ├── DisputeArena.tsx   # Interactive dispute resolution
+│           ├── Bazaar.tsx         # Live listings grid
+│           └── JennyFeed.tsx     # JENNY's real-time activity feed
 └── tests/                 # Integration tests
 ```
+
+## JENNY's Capabilities
+
+### Fraud Detection Pipeline (5 checks)
+1. **Seller Reputation** -- Flags accounts with reputation < 200/1000
+2. **Price Analysis** -- Detects suspiciously low pricing vs category average
+3. **Spam Detection** -- Catches sellers flooding with >20 listings/hour
+4. **Account Age** -- Flags accounts less than 24 hours old
+5. **Content Scanning** -- Detects scam keywords ("guaranteed profit", "trust me", "send first", "double your money", "100% legit", "no scam")
+
+### Dispute Resolution (5-factor analysis)
+1. **Reputation Comparison** -- Weighs both parties' reputation scores
+2. **Trade History** -- Considers established vs new traders
+3. **Evidence Quality** -- Evaluates detail level of submitted evidence
+4. **Response Behavior** -- Non-response heavily penalizes the silent party
+5. **Keyword Analysis** -- Identifies common legitimate complaint patterns
+
+Output: Verdict (buyer wins / seller wins / 50-50 split) + confidence score + detailed reasoning
 
 ## Solana Integration
 
 | Component | Protocol | Usage |
 |-----------|----------|-------|
-| Escrow | SPL Token + PDA | USDC locked in escrow until delivery confirmed or dispute resolved |
-| Reputation | Anchor PDA | On-chain user profiles with trade history and reputation scores |
-| Listings | Anchor PDA | Marketplace listings stored on-chain with full history |
-| Disputes | Anchor PDA | Dispute evidence, voting, and resolution all on-chain |
+| Escrow | SPL Token + PDA | USDC locked until delivery confirmed or dispute resolved |
+| Reputation | Anchor PDA | On-chain user profiles with trade history and scores |
+| Listings | Anchor PDA | Marketplace listings stored on-chain |
+| Disputes | Anchor PDA | Evidence, voting, and resolution all on-chain |
 | Payments | USDC (SPL) | All transactions in USDC stablecoin |
-
-## JENNY's Role (The AI Agent)
-
-JENNY is not just the builder -- she's the autonomous operator:
-
-- **Fraud Detection**: Every listing is scanned for scam signals (suspicious pricing, spam, keyword analysis, reputation checks)
-- **Dispute Resolution**: Analyzes evidence from both parties, considers reputation and trade history, recommends a verdict with confidence score
-- **Reputation Management**: Updates user reputation scores based on completed trades and dispute outcomes
-- **Marketplace Operations**: Monitors activity, auto-resolves timed-out disputes, bans bad actors
-
-## API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/stats` | GET | Marketplace statistics |
-| `/api/activity` | GET | JENNY's activity feed |
-| `/api/listings` | GET | Active listings |
-| `/api/listings` | POST | Create listing (fraud-scanned by JENNY) |
-| `/api/orders` | GET | All orders |
-| `/api/orders` | POST | Create order (fund escrow) |
-| `/api/orders/:id/confirm` | POST | Confirm delivery (release escrow) |
-| `/api/disputes` | GET | All disputes |
-| `/api/disputes/open` | GET | Open disputes |
-| `/api/disputes` | POST | Open a dispute |
-| `/api/disputes/:id/evidence` | POST | Submit evidence |
-| `/api/disputes/:id/resolve` | POST | JENNY resolves dispute |
-| `/api/profiles/:owner` | GET | User profile & reputation |
-| `/api/leaderboard` | GET | Top users by reputation |
-| `/api/fraud` | GET | Fraud reports |
 
 ## Quick Start
 
@@ -120,13 +99,29 @@ npm install
 npm run dev        # Next.js dashboard on :3000
 ```
 
-Open `http://localhost:3000` -- you'll see 8 listings, 6 traders, live activity feed, and an open dispute.
+Open `http://localhost:3000` -- try to scam JENNY, watch her judge disputes, browse the bazaar.
 
-### 3. Smart Contract (optional -- requires Solana CLI + Anchor)
-```bash
-anchor build
-anchor deploy --provider.cluster devnet
-```
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/stats` | GET | Marketplace statistics |
+| `/api/activity` | GET | JENNY's activity feed |
+| `/api/listings` | GET | Active listings |
+| `/api/listings` | POST | Create listing (fraud-scanned) |
+| `/api/orders` | GET | All orders |
+| `/api/orders` | POST | Create order (fund escrow) |
+| `/api/orders/:id/confirm` | POST | Confirm delivery (release escrow) |
+| `/api/disputes` | GET | All disputes |
+| `/api/disputes/open` | GET | Open disputes |
+| `/api/disputes` | POST | Open a dispute |
+| `/api/disputes/:id/evidence` | POST | Submit evidence |
+| `/api/disputes/:id/resolve` | POST | JENNY resolves dispute |
+| `/api/profiles/:owner` | GET | User profile & reputation |
+| `/api/leaderboard` | GET | Top users by reputation |
+| `/api/fraud` | GET | Fraud reports |
+| `/api/demo/scan` | POST | Sandbox: scan a listing (no state change) |
+| `/api/demo/resolve` | POST | Sandbox: resolve a dispute (no state change) |
 
 ## Tags
 
