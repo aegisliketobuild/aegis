@@ -5,76 +5,91 @@
 :root {
   --bg-primary: #09090b;
   --bg-card: #111113;
-  --border: #27272a;
+  --border: #1e1e22;
   --accent: #f59e0b;
 }
 
 body {
   background: var(--bg-primary);
-  color: #e4e4e7;
+  color: #a1a1aa;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: #27272a; border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
 /* Card */
 .card {
-  @apply bg-[#111113] border border-[#27272a] rounded-xl p-5 transition-all duration-200;
+  @apply bg-[#111113] border border-[#1e1e22] rounded-lg p-4 transition-colors duration-150;
 }
 .card:hover {
-  border-color: #3f3f46;
+  border-color: #2a2a2e;
 }
 
-/* Terminal - the star of the show */
+/* Terminal */
 .terminal {
-  @apply bg-[#0a0a0c] border border-zinc-800/80 rounded-xl p-5 font-mono text-[13px] leading-relaxed;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+  @apply bg-[#0a0a0c] border border-zinc-800/60 rounded-lg p-4 font-mono text-[12px] leading-relaxed;
 }
 
-/* Badges */
-.badge {
-  @apply px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide uppercase;
+/* Badges for metas */
+.meta-badge {
+  @apply px-2 py-0.5 rounded text-[10px] font-medium tracking-wide uppercase;
 }
-.badge-services { @apply bg-blue-500/10 text-blue-400 border border-blue-500/20; }
-.badge-goods { @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/20; }
-.badge-digital { @apply bg-violet-500/10 text-violet-400 border border-violet-500/20; }
-.badge-general { @apply bg-zinc-500/10 text-zinc-400 border border-zinc-500/20; }
-
-.badge-open { @apply bg-red-500/10 text-red-400 border border-red-500/20; }
-.badge-resolved { @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/20; }
-.badge-funded { @apply bg-amber-500/10 text-amber-400 border border-amber-500/20; }
+.meta-memecoin { @apply bg-pink-500/10 text-pink-400 border border-pink-500/20; }
+.meta-defi { @apply bg-blue-500/10 text-blue-400 border border-blue-500/20; }
+.meta-ai { @apply bg-violet-500/10 text-violet-400 border border-violet-500/20; }
+.meta-infra { @apply bg-zinc-500/10 text-zinc-400 border border-zinc-500/20; }
+.meta-stable { @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/20; }
+.meta-lsd { @apply bg-cyan-500/10 text-cyan-400 border border-cyan-500/20; }
+.meta-btc-fi { @apply bg-orange-500/10 text-orange-400 border border-orange-500/20; }
+.meta-other { @apply bg-zinc-500/10 text-zinc-500 border border-zinc-500/20; }
 
 /* Buttons */
 .btn-primary {
-  @apply px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-lg text-sm transition-all duration-150 active:scale-[0.98];
+  @apply px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-lg text-xs transition-all duration-150 active:scale-[0.98];
 }
 .btn-secondary {
-  @apply px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium rounded-lg text-sm border border-zinc-700 transition-all duration-150;
+  @apply px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium rounded-lg text-xs border border-zinc-700/50 transition-all duration-150;
+}
+.btn-ghost {
+  @apply px-3 py-1.5 text-zinc-500 hover:text-zinc-300 text-xs font-medium transition-colors;
+}
+
+/* Momentum bar */
+.momentum-bar {
+  @apply h-1 rounded-full;
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
 }
 
 /* Animations */
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-in {
-  animation: fade-in 0.5s ease-out both;
+  animation: fade-in 0.4s ease-out both;
 }
 
 @keyframes slide-in {
-  from { opacity: 0; transform: translateX(-8px); }
+  from { opacity: 0; transform: translateX(-6px); }
   to { opacity: 1; transform: translateX(0); }
 }
 .animate-slide-in {
-  animation: slide-in 0.25s ease-out both;
+  animation: slide-in 0.2s ease-out both;
 }
+
+/* Table */
+table { @apply w-full; }
+th { @apply text-left text-[10px] font-medium text-zinc-600 uppercase tracking-wider pb-2; }
+td { @apply py-2 text-[13px]; }
+tr { @apply border-b border-[#1e1e22]; }
+tr:last-child { @apply border-b-0; }
 
 /* Selection */
 ::selection {
-  background: rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.25);
   color: white;
 }
